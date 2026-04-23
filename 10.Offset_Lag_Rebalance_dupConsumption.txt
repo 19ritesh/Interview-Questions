@@ -1,0 +1,28 @@
+
+
+3. WHAT IS OFFSET, LAG, REBALANCE, AND WHY DUPLICATE CONSUMPTION CAN HAPPEN ?
+________________________________________________________________________________
+
+        1. Offset means message position number inside one partition.
+        2. every record in one partition has offset like 0, 1, 2, 3.
+        3. consumer remembers till which offset it already processed.
+        4. Lag means producer has already written more messages, but consumer is still behind.
+        5. simple words, lag = unread pending records count.
+        6. Rebalance means Kafka reassigns partitions among consumers.
+        7. this happens when new consumer joins, old consumer goes down, or topic partition assignment changes.
+        8. duplicate consumption can happen if message is processed but offset commit did not happen before crash.
+        9. after restart consumer may read same message again.
+
+        Example:
+        1. partition latest offset = 120
+        2. consumer committed offset = 100
+        3. lag = around 20 messages
+        4. if consumer processes 101 to 105 but crashes before commit
+        5. after restart same 101 to 105 may come again
+
+        Code snippet:
+
+                           ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofSeconds(1));   // read records from current offset
+                           records.forEach(record -> process(record));                                             // app processes messages
+                           kafkaConsumer.commitSync();                                                             // offset save after processing
+                           // if crash happens before commit, same records can come again later

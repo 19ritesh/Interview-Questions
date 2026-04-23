@@ -1,0 +1,51 @@
+
+** Blocking Queue: -Blocking queue interface represents a queue which is Thread safe to put elements into,
+                   and take elements out of form.
+           Usage:- Typically used in producer-consumer pattern — one thread produces objects and puts into queue,
+                   another thread consumes (takes out) from the same queue. Both threads don't need to worry about
+                   synchronization, BlockingQueue handles it internally.
+
+=============================================================================================================================                  
+
+
+** // Step 1: Create a BlockingQueue with capacity 5
+
+    BlockingQueue<String> queue = new ArrayBlockingQueue<>(5);
+
+    // Step 2: Producer thread — puts items into queue
+    Thread producer = new Thread(() -> {
+        try {
+            queue.put("Order-1");    // if queue full, this line will BLOCK until space available
+            queue.put("Order-2");
+            queue.put("Order-3");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+
+
+ ** // Step 3: Consumer thread — takes items from queue
+    Thread consumer = new Thread(() -> {
+        try {
+            String item = queue.take();  // if queue empty, this line will BLOCK until item available
+            System.out.println("Consumed: " + item);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    });
+
+
+** // Step 4: Start both threads
+    producer.start();
+    consumer.start();
+
+
+**  Key Methods:
+    queue.put(item)          -> blocks if queue is full, waits until space available
+    queue.take()             -> blocks if queue is empty, waits until item available
+    queue.offer(item)        -> returns false immediately if queue is full (non-blocking)
+    queue.offer(item, 5, TimeUnit.SECONDS)  -> waits 5 sec, then returns false if still full
+    queue.poll()             -> returns null immediately if queue is empty (non-blocking)
+    queue.poll(5, TimeUnit.SECONDS)         -> waits 5 sec, then returns null if still empty
+    queue.size()             -> current number of items in queue
+    queue.remainingCapacity() -> how many more items can fit                      

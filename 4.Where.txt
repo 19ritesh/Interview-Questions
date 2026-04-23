@@ -1,0 +1,61 @@
+
+
+Q5: Real-time scenarios where we use CompletableFuture
+
+        1. Scenario 1 - Parallel API calls
+
+           1. suppose one API request needs data from 2-3 different services.
+           2. if we call them one by one, response becomes slow because each call waits for previous call.
+           3. with CompletableFuture, those service calls can run in parallel same time.
+           4. after all responses come, we combine them and return one final response object.
+           5. in my project also we had similar case, where one flow needed data from multiple places.
+           6. by running independent calls in parallel, total response time became less and user did not wait too much.
+
+           Code snippet:
+
+                              CompletableFuture<String> service1 = CompletableFuture.supplyAsync(() -> "service-1-data");
+                              CompletableFuture<String> service2 = CompletableFuture.supplyAsync(() -> "service-2-data");
+                              CompletableFuture<String> merged = service1.thenCombine(service2, (a, b) -> a + "|" + b);
+
+
+        2. Scenario 2 - Dealer enrichment flow
+
+           1. suppose basic record already came from database, but extra details still need to come from different sources.
+           2. if we load extra details one by one, page or API response becomes more slow.
+           3. with CompletableFuture, those extra calls can run in parallel after base data comes.
+           4. this type of scenario was also there in my project, where one main entity needed some extra information.
+           5. because of parallel enrichment, overall processing time went down and flow looked cleaner.
+
+           Code snippet:
+
+                              CompletableFuture<String> detail1 = CompletableFuture.supplyAsync(() -> "detail-1");
+                              CompletableFuture<String> detail2 = CompletableFuture.supplyAsync(() -> "detail-2");
+                              CompletableFuture.allOf(detail1, detail2).join();
+
+
+        3. Scenario 3 - Background audit
+
+           1. sometimes main business work is done, but side work is still pending like audit log, analytics, mail, event push.
+           2. if main request waits for all side work also, response gets delayed.
+           3. with CompletableFuture, side work can run in background and main response can go early.
+           4. in my project also similar thing was there, where side activity was not needed before sending response.
+           5. so async background execution helped in making request flow faster.
+
+           Code snippet:
+
+                              CompletableFuture.runAsync(() -> auditLogService.saveLog("dealer updated"));
+
+
+        4. Scenario 4 - Fallback if external API fail
+
+           1. sometimes external service fails or becomes slow, but still system should return something usable.
+           2. in that case CompletableFuture error handling can return cached data or default data.
+           3. this is useful in real project because user gets some response instead of full failure every time.
+           4. in my project also similar idea is useful when dependent service does not respond properly.
+           5. because of fallback, user flow does not break fully.
+
+           Code snippet:
+
+                              CompletableFuture<String> data = CompletableFuture.supplyAsync(() -> {
+                                  throw new RuntimeException("api down");
+                              }).exceptionally(ex -> "cached-data");

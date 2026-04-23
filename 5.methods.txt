@@ -1,0 +1,87 @@
+
+
+6. IMPORTANT METHODS, INTERNAL DS, TIME COMPLEXITY
+______________________________________________________
+
+        1. Important producer/consumer methods:
+
+           1. send(record)
+              1. use: producer sends one message to topic.
+              2. internal side: record goes to producer buffer first, then broker append happens.
+              3. rough complexity: producer-side enqueue near O(1), broker append also near O(1) amortized.
+
+              Code snippet:
+
+                           kafkaProducer.send(new ProducerRecord<>("dealer-topic", "D1", "created"));   // send one event
+
+           2. poll(duration)
+              1. use: consumer reads available records from broker.
+              2. internal side: fetch from partition log by current offset.
+              3. rough complexity: depends on batch size, usually O(k) for k records returned.
+
+              Code snippet:
+
+                           ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofSeconds(1));  // read batch
+
+           3. subscribe(topics)
+              1. use: consumer joins topic and consumer group flow.
+              2. internal side: group coordination and partition assignment starts.
+              3. rough complexity: not simple fixed one, but register side is small, rebalance cost depends on partitions and consumers.
+
+              Code snippet:
+
+                           kafkaConsumer.subscribe(List.of("dealer-topic"));   // consumer subscribes topic
+
+           4. commitSync()
+              1. use: save processed offset synchronously.
+              2. internal side: offset written to Kafka internal topic.
+              3. rough complexity: near O(1) for one commit request, network cost separate.
+
+              Code snippet:
+
+                           kafkaConsumer.commitSync();                          // save offset after successful processing
+
+           5. commitAsync()
+              1. use: save offset async way.
+              2. internal side: offset commit request goes without blocking much.
+              3. rough complexity: near O(1) request side.
+
+              Code snippet:
+
+                           kafkaConsumer.commitAsync();                         // faster offset commit style
+
+           6. seek(partition, offset)
+              1. use: move consumer to specific offset.
+              2. internal side: just changes read pointer for partition.
+              3. rough complexity: near O(1).
+
+              Code snippet:
+
+                           kafkaConsumer.seek(new TopicPartition("dealer-topic", 0), 15L);   // jump to old message position
+
+           7. partitionsFor(topic)
+              1. use: get topic partition metadata.
+              2. internal side: broker metadata fetch.
+              3. rough complexity: near O(p) for p partition metadata items returned.
+
+              Code snippet:
+
+                           kafkaConsumer.partitionsFor("dealer-topic");        // metadata about partitions
+
+        2. Internal DS basic idea:
+
+           1. Kafka topic is divided into partitions.
+           2. each partition is append-only log.
+           3. messages are stored in log segments on disk.
+           4. Kafka uses offset as position number.
+           5. it also keeps index files, so broker can jump faster to message range.
+           6. producer side has record accumulator/buffer before send.
+           7. consumer side tracks offsets, and group coordinator tracks assignments.
+
+        3. Time complexity rough way interviewer answer:
+
+           1. write/append in partition log -> near O(1) amortized.
+           2. sequential read by offset -> near O(1) to start, then O(k) for k records read.
+           3. consumer group rebalance -> depends on partitions and consumers, roughly O(p + c) type discussion okay in interview.
+           4. lookup by offset uses index help, so practical access is fast.
+           5. exact complexity can depend on batching, compression, disk flush, replication also.

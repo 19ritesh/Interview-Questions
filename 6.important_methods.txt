@@ -1,0 +1,118 @@
+Q4: Important methods, internal DS, time complexity (rough)
+
+        1. Main methods:
+
+           1. supplyAsync(Supplier)
+
+              1. use: run async and return one value at end.
+              2. DS: executor queue, mostly common pool queue if custom executor not given.
+              3. complexity: submit O(1), actual work depends on supplier logic.
+
+              Code:
+                           CompletableFuture<Integer> a = CompletableFuture.supplyAsync(() -> 10);
+
+
+           2. runAsync(Runnable)
+
+              1. use: run async, no return value needed.
+              2. DS: executor queue, same style as async task scheduling.
+              3. complexity: submit O(1), task time depends on runnable work.
+
+              Code:
+                           CompletableFuture<Void> b = CompletableFuture.runAsync(() -> System.out.println("log job"));
+
+
+           3. thenApply(Function)
+
+              1. use: transform output to next value after first result comes.
+              2. DS: dependent completion node add on current future.
+              3. complexity: register O(1), function execution depends on transform work.
+
+              Code:
+                           CompletableFuture<String> c = a.thenApply(x -> "value=" + x);
+
+
+           4. thenCompose(Function)
+
+              1. use: after one async, start next async task and flatten result.
+              2. DS: dependent node + relay to next future state.
+              3. complexity: register O(1), rest depends on nested future/task time.
+
+              Code:
+                           CompletableFuture<String> d = CompletableFuture.supplyAsync(() -> "SAP1001")
+                                   .thenCompose(code -> CompletableFuture.supplyAsync(() -> "Dealer-" + code));
+
+
+           5. thenCombine(other, fn)
+
+              1. use: combine 2 independent futures together when both are done.
+              2. DS: wait nodes on both futures.
+              3. complexity: register O(1), combine function cost separate.
+
+              Code:
+                           CompletableFuture<Integer> x = CompletableFuture.supplyAsync(() -> 2);
+                           CompletableFuture<Integer> y = CompletableFuture.supplyAsync(() -> 3);
+                           CompletableFuture<Integer> sum = x.thenCombine(y, Integer::sum);
+
+
+           6. allOf(f1, f2, ...)
+
+              1. use: wait for all futures to complete before moving next.
+              2. DS: shared completion coordination node/counter style.
+              3. complexity: O(n) registration for all given futures.
+
+              Code:
+                           CompletableFuture<Void> all = CompletableFuture.allOf(x, y, sum);
+
+
+           7. anyOf(f1, f2, ...)
+
+              1. use: result of whichever future completes first among given futures.
+              2. DS: completion race on shared result holder.
+              3. complexity: O(n) registration for all futures.
+
+              Code:
+                           CompletableFuture<Object> any = CompletableFuture.anyOf(x, y);
+
+
+           8. exceptionally(fn)
+
+              1. use: if error comes, give fallback value instead of full failure.
+              2. DS: exceptional completion node attached.
+              3. complexity: O(1) register, fallback code cost separate.
+
+              Code:
+                           CompletableFuture<String> safe = d.exceptionally(ex -> "default-value");
+
+
+           9. handle(fn)
+
+              1. use: handle success and error both in one place after stage completes.
+              2. DS: dependent node attached with both-path handling.
+              3. complexity: O(1) register, handle logic cost separate.
+
+              Code:
+                           CompletableFuture<String> handled = safe.handle((res, ex) -> ex == null ? res : "error");
+
+
+          10. join() / get()
+
+              1. use: read final result at end when caller now really needs value.
+              2. DS: if not complete, thread may park/wait till result is ready.
+              3. complexity: if already done O(1), otherwise total wait time depends on task completion.
+
+              Code:
+                           String out = handled.join();
+
+
+        2. Internal DS basic idea, not full JVM deep level but simple view:
+
+           1. CompletableFuture keeps completion nodes inside, like linked type stack/list, so dependent stages can stay connected.
+           2. for completing stages, CAS ops are used a lot, so threads can update state safely without heavy locking every time.
+           3. async task mostly goes in ForkJoinPool queue, work-stealing deque style, when we use default async methods.
+
+        3. Complexity rough, because exact internal path depends on completion flow also:
+
+           1. next stage register mostly O(1) in normal case, because one more dependent node gets attached.
+           2. on completion it can go till O(k), based on dependent stages count which need triggering.
+           3. allOf/anyOf registration side roughly O(n) for n futures, because all futures need coordination setup.

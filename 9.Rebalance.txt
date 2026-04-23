@@ -1,0 +1,20 @@
+
+
+10. REBALANCE ?
+___________________________________________
+
+        1. Rebalance means Kafka reassigns partitions among consumers in one group.
+        2. this happens when new consumer joins, one consumer leaves, or topic partitions change.
+        3. during rebalance, some small pause can happen.
+        4. after rebalance, partition ownership changes.
+        5. this is normal behavior, but too much rebalance is not good.
+
+        Example:
+        1. group has 2 consumers first
+        2. later 3rd consumer joins
+        3. Kafka again distributes partitions across 3 consumers
+
+        Code snippet:
+
+                           kafkaConsumer.subscribe(List.of("dealer-events"));   // when group membership changes, rebalance can happen
+

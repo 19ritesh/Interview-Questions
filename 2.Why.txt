@@ -1,0 +1,14 @@
+
+
+3. WHY KAFKA NEEDED ?
+___________________________________________
+
+        1. Kafka is needed when direct synchronous flow starts becoming heavy.
+        2. if one request is doing DB save + notification + audit + analytics + retry handling, code becomes slow and tightly coupled.
+        3. Kafka helps because producer and consumer become separate.
+        4. one service only pushes event, and other services process later.
+        5. because of this, system becomes more scalable, loose coupled, and burst traffic can be handled better.
+
+        Code snippet:
+
+                           kafkaProducer.send(new ProducerRecord<>("dealer-events", "SAP1005", "dealer-updated"));   // main service only publishes event

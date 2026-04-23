@@ -1,0 +1,23 @@
+
+
+5. WHEN TO USE KAFKA INSTEAD OF RABBITMQ OR DIRECT REST CALL ?
+___________________________________________
+
+        1. use Kafka when event stream is high volume and many consumers need same data.
+        2. use Kafka when replay is important.
+        3. use Kafka when messages should stay for some retention time and later consumer can read old data by offset.
+        4. use Kafka when analytics, event pipeline, logs, activity stream, CDC, notifications, bulk async processing type flow is there.
+        5. direct REST call is better when immediate request-response is needed and only one service needs result now.
+        6. RabbitMQ is better when queue/work distribution, routing, task queue, per-message ack flow, and low-latency worker dispatch is stronger requirement.
+        7. Kafka is stronger in streaming, replay, partition scale, and event history style use case.
+
+        Example:
+        1. if one dealer update event should go to audit, analytics, cache, reporting all together -> Kafka good.
+        2. if one service just needs immediate reply from another service now -> REST better.
+        3. if one background worker should pick task and finish once -> RabbitMQ also very good choice.
+
+        Code snippet:
+
+                           kafkaProducer.send(new ProducerRecord<>("dealer-events", "D2001", "dealer-updated"));   // one event, many consumers can read
+                           // REST case would be one direct service-to-service HTTP call
+                           // RabbitMQ case would be one queue message for worker processing

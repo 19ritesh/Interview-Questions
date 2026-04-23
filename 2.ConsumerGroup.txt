@@ -1,0 +1,21 @@
+
+
+7. CONSUMER GROUP ?
+___________________________________________
+
+        1. Consumer group means one logical group of consumers.
+        2. inside one group, one partition goes to only one consumer at one time.
+        3. because of this, same work splits among many consumers.
+        4. if another different group reads same topic, then it gets full topic data again.
+        5. so consumer group is very important for scalability and isolated consumption.
+
+        Example:
+        1. group audit-service reads dealer-events
+        2. group analytics-service also reads dealer-events
+        3. both groups get same event independently
+        4. inside one same group, partitions split among consumers
+
+        Code snippet:
+
+                           kafkaConsumer.subscribe(List.of("dealer-events"));   // consumer joins topic under one group id
+                           // group id is usually configured in consumer properties

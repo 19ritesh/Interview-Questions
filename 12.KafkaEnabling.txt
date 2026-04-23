@@ -1,0 +1,50 @@
+
+
+12. KAFKA ENABLING:-
+________________________
+
+        1. `pom.xml` me dependency add karo:
+           1. `org.springframework.kafka:spring-kafka`
+
+        2. `src/main/resources/application.properties` (aur env files) me basic config add karo:
+
+           Code snippet:
+
+                              spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS}
+                              spring.kafka.consumer.group-id=location-master-group
+                              spring.kafka.consumer.auto-offset-reset=earliest
+                              spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+                              spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+                              spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
+                              spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.JsonDeserializer
+
+        3. Kafka config class banao (`src/main/java/.../config/KafkaConfig.java`):
+           1. `@Configuration`
+           2. `@EnableKafka`
+           3. required topics as `NewTopic` beans
+
+        4. Producer service banao (`KafkaTemplate` use karke):
+           1. migration/admin/mobile flow ke successful point pe event publish karo
+
+           Code snippet:
+
+                              kafkaTemplate.send("dealer-events", "D1001", payload);
+
+        5. Consumer service banao:
+           1. `@KafkaListener(topics = "dealer-events", groupId = "location-master-group")`
+           2. message process karo and offset commit strategy decide karo
+
+           Code snippet:
+
+                              @KafkaListener(topics = "dealer-events", groupId = "location-master-group")
+                              public void consume(String payload) {
+                                  // business logic
+                              }
+
+        6. Basic safety minimum:
+           1. idempotent processing
+           2. retry + DLQ
+           3. lag/error monitoring
+
+        7. One-line interview answer:
+           1. dependency add, properties set, `@EnableKafka` config, producer + `@KafkaListener` consumer, then retry/DLQ and monitoring.

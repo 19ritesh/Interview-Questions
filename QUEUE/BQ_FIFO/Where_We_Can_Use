@@ -1,0 +1,76 @@
+
+
+Q3: Where can we use BlockingQueue in real-time scenarios?
+
+        1. Scenario 1 — Bulk Upload Processing:
+
+           1. Suppose we have a service where admin uploads Excel file with 10,000 dealer records.
+           2. If we process all 10,000 in single thread, API will timeout. So instead —
+              Thread-1 (producer) reads Excel rows and puts them into BlockingQueue.
+           3. Thread-2,3,4 (consumers) pick from queue and save to database.
+           4. If consumers are slow, producer automatically waits (queue full). If producer is slow,
+           5. consumers automatically wait (queue empty). No data loss, no race condition.
+
+           6. Code snippet:
+
+                              BlockingQueue<String> queue = new ArrayBlockingQueue<>(500);
+                              queue.put("dealer-row-1");
+                              String row = queue.take();
+                              dealershipLocationRepository.save(row);
+
+        2. Scenario 2 — Rate-Limited External API Calls:
+        
+           1. Suppose we need to call MDP API for 500 dealer codes, but MDP has rate limit of 10 req/sec.
+           2. We put all 500 dealer codes into a BlockingQueue. Then 3 worker threads pick one by one
+           3. from queue, call MDP, and process response. When queue is empty, workers stop automatically.
+           4. No busy-waiting, no polling loop needed.
+
+           5. Code snippet:
+
+                              BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+                              queue.put("SAP1001");
+                              String dealerCode = queue.take();
+                              mdpDealerService.getActiveDealerDataOrElseThrow(dealerCode, locationType);
+
+        3. Scenario 3 — Log Processing / Event Pipeline:
+        
+           1. Application generates thousands of log events per second. Instead of writing to file/DB directly 
+              (which is slow and blocks main thread), events go into BlockingQueue.      
+           2. A separate background thread picks events from queue and writes to file/DB in batches. Main thread never 
+              gets blocked by I/O.   
+
+           3. Code snippet:
+
+                              BlockingQueue<String> queue = new LinkedBlockingQueue<>(1000);
+                              queue.put("dealer updated successfully");
+                              String logEvent = queue.take();
+                              auditLogService.saveLog(logEvent);
+
+        4. Scenario 4 — Order Processing in E-Commerce:
+        
+           1. Customer places order -> order goes into BlockingQueue. Multiple worker threads pick orders and process
+              them (payment, inventory, notification). If order volume is high, workers are
+              busy and queue fills up.  
+           2. If queue reaches capacity, the system naturally applies backpressure (new orders wait until 
+              workers free up).   
+
+           3. Code snippet:
+
+                              BlockingQueue<String> queue = new ArrayBlockingQueue<>(200);
+                              queue.put("order-101");
+                              String orderId = queue.take();
+                              orderService.process(orderId);
+
+        5. Scenario 5 — Thread Pool Internals:
+           
+           1. Java's ThreadPoolExecutor itself uses BlockingQueue internally. 
+           2. When we submit a task to thread pool and all threads are busy, the task sits in the BlockingQueue
+              waiting for a free thread.      
+           3. This is why when we create ThreadPoolExecutor, we pass a BlockingQueue as constructor parameter.   
+
+           4. Code snippet:
+
+                              BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(500);
+                              ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 20, 60,
+                                      TimeUnit.SECONDS, queue);
+                              executor.submit(() -> asyncJobService.submitJob(() -> {}, "sample job"));

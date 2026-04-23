@@ -1,0 +1,25 @@
+
+
+DIFFERENCE BETWEEN AT-MOST-ONCE, AT-LEAST-ONCE, AND EXACTLY-ONCE DELIVERY ?
+_____________________________________________________________________________
+
+        1. At-most-once means message can be lost, but duplicate should not come.
+        2. this usually happens when offset commit happens before actual processing.
+        3. if crash happens after commit and before real business work, message is gone.
+        4. At-least-once means message will come at least one time, but duplicate can come.
+        5. this is most common and practical mode.
+        6. process first, commit later, so crash before commit can cause duplicate read.
+        7. Exactly-once means no loss and no duplicate effect in final result.
+        8. this is harder and needs Kafka transactions or idempotent processing + correct sink handling.
+        9. interview one line answer:
+           1. at-most-once -> possible loss
+           2. at-least-once -> possible duplicate
+           3. exactly-once -> strongest but more complex
+
+        Code snippet:
+
+                           kafkaConsumer.commitSync();                              // if commit first, can move toward at-most-once style risk
+                           process(record);                                         // if crash before this, message effect lost
+
+                           process(record);                                         // process first
+                           kafkaConsumer.commitSync();                              // then commit -> common at-least-once style

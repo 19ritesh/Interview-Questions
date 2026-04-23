@@ -1,0 +1,22 @@
+
+
+
+8. LAG ?
+___________________________________________
+
+        1. Lag means consumer is behind producer.
+        2. simple words, pending unread messages count.
+        3. if latest offset is 500 and consumer committed 450, lag is around 50.
+        4. high lag means consumer is slow or producer traffic is high.
+        5. in production, lag monitoring is very important.
+
+        Example:
+        1. producer keeps writing quickly
+        2. consumer processes slowly
+        3. backlog grows
+        4. this backlog is lag
+
+        Code snippet:
+
+                           // no direct simple Java one-liner here in normal app code
+                           // but concept is: latest offset - committed offset = lag

@@ -1,0 +1,63 @@
+
+
+** Q4: What data structure does BlockingQueue use internally?
+
+       It depends on which implementation we use. BlockingQueue is just an interface, 
+       it has multiple implementations and each uses different internal data structure:
+
+       1. Implementation 1 — ArrayBlockingQueue:
+
+          1. Internal DS: Fixed-size Array (circular buffer pattern):- 
+
+             1. How it works:   With head and tail pointer. When tail  reaches end of array,
+                                It wraps around to beginning (circular). Bounded — size is fixed at creation time.
+
+             2. Locking:        Uses single ReentrantLock for both put and take operations.
+
+             3. When to use:    When we know the max capacity upfront and want memory-efficient bounded queue. 
+
+             4. Code snippet:
+
+                                BlockingQueue<String> queue = new ArrayBlockingQueue<>(100);
+                                queue.put("import-job-1");
+                                String job = queue.take();
+
+
+        2. Implementation 2 — LinkedBlockingQueue:  
+
+           Internal DS: Singly Linked List (Node-based)   
+
+           1. How it works:     Each element is a Node with value and next pointer. New elements added at tail,
+                                removed from head.
+
+           2. Locking:          Uses TWO separate ReentrantLock — one putLock (for producers) and one takeLock
+                                (for consumers). This is why throughput is higher — producer and consumer don't
+                                block each other.  
+
+           3. Capacity:         Optionally bounded or unbounded (default Integer.MAX_VALUE). When to use: When we 
+                                want higher throughput and producers/consumers should not block each
+                                other. Most commonly used implementation.    
+
+           4. Code snippet:
+
+                                BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>(500);
+                                ThreadPoolExecutor executor = new ThreadPoolExecutor(10, 20, 60,
+                                        TimeUnit.SECONDS, queue);
+                                executor.submit(() -> System.out.println("async job running"));
+
+        3. Implementation 4 — SynchronousQueue:
+        
+           Internal DS: No internal storage at all. Capacity is zero.
+
+           1. How it works:     Producer blocks until a consumer is ready to take. It's a direct hand-off
+                                mechanism. No buffering.  
+           2. When to use:      When we want direct transfer between threads without any queuing.
+                                Used by Executors.newCachedThreadPool() internally.                                           
+
+           3. Code snippet:
+
+                                BlockingQueue<String> queue = new SynchronousQueue<>();
+                                new Thread(() -> {
+                                    try { System.out.println(queue.take()); } catch (Exception e) { }
+                                }).start();
+                                queue.put("direct-hand-off-job");

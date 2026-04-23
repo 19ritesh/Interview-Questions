@@ -1,0 +1,22 @@
+
+
+4. BEFORE KAFKA WHAT USING, AND WHAT PROBLEM ?
+___________________________________________
+
+        1. before Kafka, usually we use direct REST call, DB polling, cron jobs, RabbitMQ in some systems, or in-process async executor.
+        2. direct REST call is simple, but producer waits for consumer service also.
+        3. DB polling works, but many times it is wasteful and delayed.
+        4. thread pool / async executor works inside one app, but cross-service durable messaging is not strong there.
+        5. when load grows, retry, ordering, replay, consumer scaling, backlog handling become difficult.
+
+        Example old style problem:
+        1. dealer verified
+        2. same API directly calls SMS service
+        3. directly calls audit service
+        4. directly calls analytics service
+        5. if one downstream is slow, whole request becomes slow or fails
+
+        Code snippet:
+
+                           notificationService.sendSms(request);                 // direct synchronous side call
+                           auditLogService.saveLog("dealer verified");         // another direct call in same flow

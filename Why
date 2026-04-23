@@ -1,0 +1,113 @@
+
+
+**  Q2: What was the problem before BlockingQueue? Why it was introduced?
+
+        Before BlockingQueue, we used to share data between threads using ArrayList or LinkedList.
+        But there were multiple problems with that approach:
+
+        Problem 1 — Thread Safety:
+
+        1. ArrayList and LinkedList are not thread-safe. 
+        2. If two threads do add() and remove() at the same time, we get ConcurrentModificationException or 
+           data corruption. 
+        3. To fix this, we had to put synchronized blocks everywhere manually.
+
+        Problem 2 — Manual Wait-Notify Logic:
+
+        1. Even after synchronized, producer thread had to manually check — "is list full? then wait."
+        2. Consumer had to check — "is list empty? then wait." This required writing while loop with wait() 
+           and notify().calls.
+        3. This code was very error-prone — missed signals, spurious wakeups,deadlocks were common bugs.  
+
+        Problem 3 — Boilerplate Code:
+
+        1. Every developer was writing the same wait-notify boilerplate again and again for every producer-consumer 
+           use case. No standard solution existed. 
+        2. So Java introduced BlockingQueue in Java 5 (JDK 1.5) as part of java.util.concurrent package.
+        3. It encapsulated all the synchronization, waiting, and notification logic inside the queue itself.
+
+           1.  put()  -> if queue is full, thread automatically blocks until space is available
+           2.  take() -> if queue is empty, thread automatically blocks until element is available
+           3.  No manual synchronization needed. No wait-notify needed. Clean and safe.
+
+
+=============================================================================================================================
+
+** Code Example — OLD way (before BlockingQueue) using wait-notify:
+
+   // Shared list between producer and consumer
+    List<String> sharedList = new ArrayList<>();
+    int MAX_CAPACITY = 5;
+    Object lock = new Object();
+
+    // Producer thread — ugly, error-prone code
+    Thread producer = new Thread(() -> {
+        while (true) {
+            synchronized (lock) {
+                // Step 1: manually check if list is full
+                while (sharedList.size() == MAX_CAPACITY) {
+                    try {
+                        lock.wait();   // Step 2: manually wait if full
+                    } catch (InterruptedException e) { }
+                }
+                sharedList.add("Order-" + System.currentTimeMillis());
+                lock.notify();         // Step 3: manually notify consumer
+            }
+        }
+    });
+
+
+** // Consumer thread — same ugly pattern
+    Thread consumer = new Thread(() -> {
+        while (true) {
+            synchronized (lock) {
+                // Step 1: manually check if list is empty
+                while (sharedList.isEmpty()) {
+                    try {
+                        lock.wait();   // Step 2: manually wait if empty
+                    } catch (InterruptedException e) { }
+                }
+                String item = sharedList.remove(0);
+                lock.notify();         // Step 3: manually notify producer
+            }
+        }
+    });   
+
+ ** // Problems with above code:
+    // 1. synchronized block mandatory — forget it and data corrupts
+    // 2. while loop with wait() mandatory — forget while and spurious wakeup breaks logic
+    // 3. notify() mandatory — forget it and other thread hangs forever (deadlock)
+    // 4. ~25 lines of boilerplate just for simple put and take
+
+============================================================================================================================
+
+** Code Example — NEW way (with BlockingQueue) — same thing, clean:
+
+    BlockingQueue<String> queue = new ArrayBlockingQueue<>(5);
+
+    // Producer thread — clean, 1 line
+    Thread producer = new Thread(() -> {
+        while (true) {
+            queue.put("Order-" + System.currentTimeMillis());  // blocks if full, no wait/notify needed
+        }
+    });
+
+    // Consumer thread — clean, 1 line
+    Thread consumer = new Thread(() -> {
+        while (true) {
+            String item = queue.take();  // blocks if empty, no wait/notify needed
+        }
+    });   
+
+
+// Consumer thread — clean, 1 line
+    Thread consumer = new Thread(() -> {
+        while (true) {
+            String item = queue.take();  // blocks if empty, no wait/notify needed
+        }
+    });
+
+// No synchronized, no wait(), no notify(), no while loop
+    // Same functionality in 5 lines instead of 25 lines
+    // Thread-safe, backpressure built-in, zero boilerplate
+         

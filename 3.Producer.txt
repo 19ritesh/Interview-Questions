@@ -1,0 +1,19 @@
+
+
+6. PRODUCER ?
+___________________________________________
+
+        1. Producer means message sender.
+        2. it creates event and sends event to Kafka topic.
+        3. producer can send with key or without key.
+        4. if key is present, partition selection becomes more controlled.
+        5. producer is first entry point of event flow.
+
+        Example:
+        1. dealer service updates one dealer
+        2. then it sends one event to dealer-events topic
+
+        Code snippet:
+
+                           ProducerRecord<String, String> record = new ProducerRecord<>("dealer-events", "D1001", "dealer-updated");
+                           kafkaProducer.send(record);   // producer sends one event

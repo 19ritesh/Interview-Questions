@@ -1,0 +1,23 @@
+
+
+11. HOW THESE WORDS WORK TOGETHER ?
+___________________________________________
+
+        1. Producer sends event to topic.
+        2. Topic is divided into partitions.
+        3. partitions are stored on brokers.
+        4. offsets track message position inside partition.
+        5. consumer group reads partitions.
+        6. lag shows how much consumer is behind.
+        7. retention keeps old messages for replay.
+        8. replication keeps data safer across brokers.
+        9. rebalance happens when consumer group members change.
+
+        Simple flow example:
+        1. producer sends dealer-updated event
+        2. broker stores it in dealer-events topic partition 1
+        3. message gets offset 55
+        4. audit-service consumer group reads offset 55
+        5. analytics-service another group also reads same event
+        6. if one consumer is slow, lag increases
+        7. if one broker fails, replica helps

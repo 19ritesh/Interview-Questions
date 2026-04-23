@@ -1,0 +1,129 @@
+
+
+LOCATION-MASTER-PROJECT-INTRO-AND-MODULES:-(LAYMAN NOTES)
+___________________________________________
+
+INTRODUCTION (INTERVIEW OPENING STYLE):-
+___________________________________________
+
+        1. in simple words, location-master is the "control tower" for dealer location data.
+        2. dealer location data comes here, gets validated here, and search results are served from here.
+        3. on one side, dealers submit location and photo from mobile.
+        4. on the other side, admin reviews and verifies or rejects that data.
+        5. business team can also upload bulk files to sync thousands of dealer records.
+        6. when app users search nearest dealers, this service gives the response.
+        7. internal IB team also uses this system for dealer create, update, list, and summary operations.
+        8. so this is not a small single API, this is a full dealer-location lifecycle platform.
+        9. this service integrates with external systems: MDP (dealer data), UMS (user/auth), Notification (SMS), Azure Blob (photo), and Google Geocode (lat-long).
+        10. final line for interviewer: "if dealer location moves from submit to verify to search, every stage touches location-master."
+
+
+TOTAL MODULES (FUNCTIONAL VIEW):-
+___________________________________________
+
+        1. total functional modules = 10
+
+
+MODULE 1 - MOBILE DEALER SUBMISSION FLOW
+___________________________________________
+
+        1. this flow is for dealer mobile app journey.
+        2. dealer submits location details, captured image location, and photo.
+        3. secret-key based validation happens before accepting request.
+        4. photo goes to blob storage and metadata is saved.
+        5. status moves in workflow so admin side can review later.
+
+
+MODULE 2 - ADMIN VERIFICATION FLOW
+___________________________________________
+
+        1. this flow is for admin or operations team.
+        2. admin gets summary, list, and details of pending dealer location cases.
+        3. admin can verify/reject and add comments.
+        4. verification state changes are persisted with audit trail.
+        5. related side actions like notification and status transitions can happen from here.
+
+
+MODULE 3 - DEALER FLOW MODULE
+___________________________________________
+
+        1. this module serves dealer-side operational APIs.
+        2. dealer info fetch, status view, and location related dealer interactions are handled here.
+        3. it works as bridge between dealer identity and current location process state.
+
+
+MODULE 4 - MIGRATION AND BULK IMPORT FLOW
+___________________________________________
+
+        1. this flow is used for bulk onboarding and periodic sync.
+        2. CSV/XLSX based import runs for location data and dealership data.
+        3. file rows are validated, sanitized, and compared with existing DB records.
+        4. result can be insert/update/soft-delete based reconciliation.
+        5. template generation and migration utility endpoints are also part of this flow.
+
+
+MODULE 5 - IB DEALER MANAGEMENT AND SEARCH FLOW
+___________________________________________
+
+        1. this is internal business (IB) dealer management area.
+        2. create, update, list, summary APIs are handled here.
+        3. internal users can manage dealer records for business operations.
+        4. this flow is important when internal team needs controlled dealer master operations.
+
+
+MODULE 6 - PROXIMITY APIS FLOW
+___________________________________________
+
+        1. this flow gives nearest dealer APIs.
+        2. user location, radius, and filters are used for finding nearby dealers.
+        3. this is core for dealer finder experience in app and web channels.
+        4. response gives practical nearest options instead of full raw dealer list.
+
+
+MODULE 7 - INDIA GEOGRAPHICAL LOCATION FLOW (COUNTRY/STATE/CITY/PROVINCE)
+___________________________________________
+
+        1. this module handles structured location master data.
+        2. country-wise provinces/states/cities related lookups are served from here.
+        3. india geography and location hierarchy style data use-cases are supported in this area.
+        4. this is useful for dropdowns, filters, and location-based API validations.
+
+
+MODULE 8 - DEALERSHIP LOCATION SEARCH FLOW
+___________________________________________
+
+        1. this flow gives dealership location search endpoints.
+        2. supports country, flag, province, city, and geocode-based search combinations.
+        3. this is used where business needs structured search results with pagination/filtering.
+
+
+MODULE 9 - INTEGRATION FLOW (EXTERNAL SYSTEMS)
+___________________________________________
+
+        1. this project talks to external systems for complete business flow.
+        2. MDP gives dealer core details, UMS gives auth/user contacts, Notification sends SMS.
+        3. Azure Blob stores files/photos, Google geocode helps address-latlong conversion.
+        4. this integration layer makes location-master useful in real ecosystem, not isolated service.
+
+
+MODULE 10 - PLATFORM SUPPORT FLOW
+___________________________________________
+
+        1. this includes security/auth handling, config, utilities, exception handling, and audit support.
+        2. cross-cutting concerns like validation, common constants, token checks, and logging sit here.
+        3. this is not business UI-facing module, but without this system cannot run stable.
+
+
+INTERVIEW QUICK SUMMARY:-
+___________________________________________
+
+        1. location-master is central platform for complete dealer location lifecycle.
+        2. it has multiple flows: mobile submit, admin verify, migration import, IB management, search/proximity, geography lookup.
+        3. integrations with MDP/UMS/Notification/Blob/Geocode make it end-to-end business-ready system.
+        4. one line answer: "this project manages dealer location data end-to-end from submission and verification till search and bulk sync."
+
+
+
+
+
+ 

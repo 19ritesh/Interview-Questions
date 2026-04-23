@@ -1,0 +1,22 @@
+
+
+Q2: Why CompletableFuture needed?
+
+        1. old async code looked too much and little hard to follow.
+        2. in Future mostly get() and wait only.
+        3. joining 2-3 async calls means long code very fast.
+        4. callback inside callback was coming many times.
+        5. error handling was in many different places.
+
+        6. so CompletableFuture came:
+
+           1. make step by step chain in clean way
+           2. combine multiple async tasks together
+           3. get non-blocking flow for better async code
+           4. fallback becomes easy when error comes
+
+        7. Code snippet:
+
+                           CompletableFuture.supplyAsync(() -> "SAP1001")
+                                   .thenApply(code -> "Dealer=" + code)
+                                   .thenAccept(System.out::println);

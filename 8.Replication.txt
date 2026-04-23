@@ -1,0 +1,22 @@
+
+
+
+9. REPLICATION ?
+___________________________________________
+
+        1. Replication means same partition data copy is kept on multiple brokers.
+        2. one broker is leader, others are follower replicas.
+        3. producer usually writes to leader.
+        4. followers copy the same data from leader.
+        5. if leader broker goes down, another replica can become leader.
+        6. this gives fault tolerance.
+
+        Example:
+        1. partition 0 leader on broker-1
+        2. same partition replica on broker-2 and broker-3
+        3. if broker-1 fails, Kafka can elect new leader
+
+        Code snippet:
+
+                           NewTopic topic = new NewTopic("dealer-events", 3, (short) 3);   // replication factor 3 example
+
