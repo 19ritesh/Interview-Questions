@@ -1,0 +1,32 @@
+
+
+
+Q3: Before CompletableFuture what using, and what problem?
+
+        1. before mainly these things were used for async or background type work:
+
+           1. Thread direct
+           2. Runnable + ExecutorService
+           3. Future
+           4. callback style
+
+        2. what issue was there in them, that is main point:
+
+           1. Future.get() stops the thread and makes wait, so async benefit becomes less many times.
+           2. no easy chain like thenApply/thenCompose there, so next step connect karna simple nahi tha.
+           3. in multi async combine, code becomes spread and long, and understanding that flow takes extra time.
+           4. exception flow breaks in many places of code, so handling also not looking together.
+           5. manual coordination was needed again and again, like wait, collect, combine, then move next.
+
+        3. Old style snippet:
+
+                           ExecutorService ex = Executors.newFixedThreadPool(4);
+                           Future<String> f = ex.submit(() -> "dealer-list");
+                           String v = f.get();
+                           ex.shutdown();
+
+        4. Better style now:
+
+                           CompletableFuture<String> f = CompletableFuture.supplyAsync(() -> "dealer-list");
+                           f.thenApply(String::toUpperCase)
+                            .thenAccept(System.out::println);

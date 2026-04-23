@@ -1,0 +1,26 @@
+
+
+OFFSET 
+___________________________________________
+
+        1. offset means record position in one partition.
+        2. each partition has its own offset sequence (0,1,2,3...).
+        3. offset is used by consumer to continue reading from last committed point.
+        4. if committed offset is 50, next record read normally starts from 51.
+        5. offset is partition-level concept, not global topic-level number.
+
+        Offset types interviewer asks:
+        1. current offset -> consumer is currently reading this position.
+        2. committed offset -> last safely saved position.
+        3. end/latest offset -> latest available record position in broker.
+
+        Interview safe answer:
+        1. offset is record index in a partition and it controls consumer progress.
+        2. lag is difference between latest offset and committed offset.
+
+        Code snippet:
+
+                           spring.kafka.consumer.auto-offset-reset=earliest   // if no committed offset, start from beginning
+                           // offset = record position in partition
+                           // lag = latest offset - committed offset
+

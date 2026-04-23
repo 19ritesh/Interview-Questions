@@ -1,0 +1,20 @@
+
+
+4. RETENTION ?
+___________________________________________
+
+        1. Retention means how long Kafka keeps old messages.
+        2. Kafka does not always delete message immediately after consumer reads.
+        3. it keeps message for configured time or size limit.
+        4. this is why replay becomes possible later.
+        5. if retention is 7 days, then consumer can still read old data within that limit.
+
+        Example:
+        1. one event came on Monday
+        2. consumer was down
+        3. if retention is 7 days, consumer can still read it on Wednesday or Friday also
+
+        Code snippet:
+
+                           // topic config example idea
+                           retention.ms=604800000   // 7 days retention

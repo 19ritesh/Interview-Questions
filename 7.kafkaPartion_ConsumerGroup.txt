@@ -1,0 +1,27 @@
+
+
+
+1. DIFFERENCE BETWEEN KAFKA PARTITION AND CONSUMER GROUP ?
+______________________________________________________________________________________
+
+        1. Partition means one topic ka one piece.
+        2. Kafka topic full ek block nahi hota, it is divided into partitions.
+        3. data inside one partition stays in order by offset.
+        4. Consumer group means one logical team of consumers reading same topic.
+        5. inside one consumer group, one partition goes to only one consumer at a time.
+        6. because of this, load gets distributed.
+        7. simple line answer:
+           1. partition = topic split for storage and parallelism.
+           2. consumer group = consumer team for parallel reading.
+
+        Example:
+        1. topic has 3 partitions: P0, P1, P2.
+        2. consumer group has 3 consumers: C1, C2, C3.
+        3. then each consumer may get one partition.
+        4. if only 2 consumers are there, one consumer will get more than one partition.
+
+        Code snippet:
+
+                           NewTopic topic = new NewTopic("dealer-topic", 3, (short) 1);     // topic with 3 partitions
+                           kafkaConsumer.subscribe(List.of("dealer-topic"));                  // consumer joins group for topic
+                           // if same group has 3 consumers, partitions can split among them

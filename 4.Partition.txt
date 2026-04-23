@@ -1,0 +1,21 @@
+
+
+3. PARTITION ?
+___________________________________________
+
+        1. Partition means one topic ka one part.
+        2. Kafka divides topic into partitions for parallelism and scalability.
+        3. each partition keeps messages in order.
+        4. ordering guarantee is inside one partition only.
+        5. same key usually goes to same partition, so related events can stay ordered.
+
+        Example:
+        1. dealer-events topic has 3 partitions
+        2. partition 0 -> D1001 events
+        3. partition 1 -> D1002 events
+        4. partition 2 -> D1003 events
+
+        Code snippet:
+
+                           NewTopic topic = new NewTopic("dealer-events", 3, (short) 1);   // topic with 3 partitions
+

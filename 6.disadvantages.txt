@@ -1,0 +1,42 @@
+
+
+
+
+
+1. ADVANTAGES OF KAFKA:-
+___________________________________________
+
+        1. Kafka is very good when high volume events are coming continuously.
+        2. one producer event can be consumed by many consumers, so fan-out use case becomes easy.
+        3. Kafka keeps message for retention time, so replay is possible later.
+        4. it gives very good scalability because partitions can split load.
+        5. it is strong for decoupling, because producer does not need direct dependency on all consumer services.
+        6. it is also good for buffering burst traffic, so sudden load can be handled better.
+        7. if interviewer asks one line answer, tell: Kafka is good for scale, replay, decoupling, and event streaming.
+
+        Example:
+        1. one dealer-updated event comes.
+        2. audit service reads it.
+        3. analytics service reads it.
+        4. notification service also reads same event.
+        5. producer still sends only one event.
+
+        Code snippet:
+
+                           kafkaProducer.send(new ProducerRecord<>("dealer-events", "D3001", "dealer-updated"));   // one publish
+                           // audit consumer can read same event
+                           // analytics consumer can also read same event
+                           // notification consumer can also read same event
+
+
+
+2. DISADVANTAGES OF KAFKA
+___________________________________________
+
+        1. Kafka setup and operations are not simple for beginner team.
+        2. broker, topic, partition, retention, offset, consumer group all need proper understanding.
+        3. debugging can become harder because flow is async, not request-response only.
+        4. duplicate message handling may be needed, so consumer should be idempotent.
+        5. ordering is guaranteed only inside one partition, not across all partitions.
+        6. small project me Kafka can be over-engineering.
+        7. monitoring also important, otherwise lag and failed consumers are not visible quickly.

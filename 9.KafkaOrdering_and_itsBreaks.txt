@@ -1,0 +1,24 @@
+
+
+2. HOW KAFKA GIVES ORDERING AND WHERE ORDERING BREAKS ?
+__________________________________________________________
+
+        1. Kafka gives ordering inside one partition.
+        2. if all related messages go to same partition, then order is maintained.
+        3. usually same key goes to same partition, so same dealerCode or same orderId can stay ordered.
+        4. ordering breaks when related messages go to different partitions.
+        5. ordering can also look broken if multiple producer retries happen in wrong config or multiple consumers process different partitions in parallel.
+        6. so interview one line answer is: Kafka ordering is partition-level, not topic-level global ordering.
+
+        Example:
+        1. message1 key = D1001 -> partition 0
+        2. message2 key = D1001 -> partition 0
+        3. order stays same there
+        4. but if D1001 event goes partition 0 and another related event goes partition 1, then overall order guarantee is gone
+
+        Code snippet:
+
+                           ProducerRecord<String, String> r1 = new ProducerRecord<>("dealer-topic", "D1001", "created");   // same key
+                           ProducerRecord<String, String> r2 = new ProducerRecord<>("dealer-topic", "D1001", "updated");   // same key again
+                           kafkaProducer.send(r1);                                                                           // usually same partition
+                           kafkaProducer.send(r2);                                                                           // order stays inside same partition

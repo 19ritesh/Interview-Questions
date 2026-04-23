@@ -1,0 +1,20 @@
+
+
+1. BROKER ?
+___________________________________________
+
+        1. Broker means one Kafka server.
+        2. simple words, broker stores messages and serves producer and consumer requests.
+        3. one Kafka cluster can have one broker or many brokers.
+        4. if many brokers are there, then data and load get distributed.
+        5. producer sends message to broker, and consumer reads message from broker.
+
+        Example:
+        1. broker-1 stores partition 0
+        2. broker-2 stores partition 1
+        3. broker-3 stores partition 2
+        4. so one topic data can stay across many brokers
+
+        Code snippet:
+
+                           spring.kafka.bootstrap-servers=broker1:9092,broker2:9092,broker3:9092   // app connects to Kafka brokers

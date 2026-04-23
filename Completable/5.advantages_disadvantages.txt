@@ -1,0 +1,37 @@
+
+
+1. ADVANTAGES OF COMPLETABLEFUTURE:-
+___________________________________________
+
+        1. async work can run in background, main thread free rahta hai for other work.
+        2. chaining easy hai, so step by step flow clean ban sakta hai.
+        3. multiple async calls parallel me chala sakte hai and combine kar sakte hai.
+        4. error handling ke liye methods milte hai like `exceptionally`, `handle`.
+        5. fallback dena easy ho jata hai when one external call fails.
+        6. better response time mil sakta hai when independent tasks are running in parallel.
+        7. readable pipeline style possible hai if chain size controlled rakho.
+
+        Good pattern snippet:
+
+                           CompletableFuture<String> f = CompletableFuture.supplyAsync(() -> "x")
+                                   .thenApply(String::toUpperCase)
+                                   .exceptionally(ex -> "default");
+                           String v = f.join(); // join only when final value is really needed
+
+
+2. Disadvantages of CompletableFuture:-
+___________________________________________
+
+        1. in debugging, stack trace not clean every time in async flow, so finding exact issue can take more time.
+        2. if join/get used in wrong place, async benefit is gone fast and code again behaves like blocking code.
+        3. if thread pool tuning is bad, starvation can come in system and tasks may wait more.
+        4. beginner needs time to understand exception flow properly, because stages connect in chain.
+        5. if chain becomes too big, reading gets hard later and maintain also gets harder.
+        6. cancellation/timeout needs extra care from developer side, not everything comes automatic.
+        7. if shared mutable data is used, race condition can come still, CompletableFuture alone not solve that.
+
+        8. Bad pattern snippet:
+
+                           CompletableFuture<String> f = CompletableFuture.supplyAsync(() -> "x");
+                           String v = f.join(); // immediate blocking
+

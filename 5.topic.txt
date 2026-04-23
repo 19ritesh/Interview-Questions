@@ -1,0 +1,19 @@
+
+
+2. TOPIC ?
+___________________________________________
+
+        1. Topic means logical category of messages.
+        2. simple words, same type events go into same topic.
+        3. for example dealer-created, dealer-updated, sms-events, audit-events.
+        4. producer writes into topic, consumer reads from topic.
+        5. topic itself is not one single file, internally it is divided into partitions.
+
+        Example:
+        1. topic name = dealer-events
+        2. messages like dealer-created, dealer-updated, dealer-deleted can go there
+
+        Code snippet:
+
+                           kafkaProducer.send(new ProducerRecord<>("dealer-events", "D1001", "dealer-created"));   // event goes to topic
+

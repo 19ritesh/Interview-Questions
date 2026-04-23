@@ -1,0 +1,59 @@
+
+2. REAL-TIME SCENARIOS WHERE WE CAN USE KAFKA
+___________________________________________
+
+        1. Scenario 1 - Dealer bulk import event flow
+           1. in this project we already have bulk import flow in migration API.
+           2. if uploaded file is very large, then request thread doing parse + compare + DB save all together can become heavy.
+           3. here Kafka can be used after file upload, so one event goes like import-started / row-batch-ready.
+           4. consumer can process rows in background batch by batch.
+           5. this makes API light and high-volume import becomes more manageable.
+
+           Code snippet:
+
+                              kafkaProducer.send(new ProducerRecord<>("dealer-import-topic", "IN", "batch-1-ready"));   // import event publish
+                              // consumer side later reads this event and processes one batch
+
+        2. Scenario 2 - Dealer verification and audit trail
+           1. in admin verification flow, one action can create many side works.
+           2. like save verification, audit log, notification, analytics update, dashboard counter update.
+           3. if all side work happens in same request, response can become slow.
+           4. here main service can save main data first, then publish one verification event to Kafka.
+           5. after that separate consumers can do audit, notification, reporting in parallel way.
+
+           Code snippet:
+
+                              kafkaProducer.send(new ProducerRecord<>("dealer-verification-topic", "SAP1001", "dealer-verified"));  // publish after main save
+
+        3. Scenario 3 - SMS / notification dispatch
+           1. in project there is SMS sending related flow also.
+           2. if many dealers need SMS at same time, direct API-to-SMS call can become slow or fail in burst.
+           3. here Kafka can work like buffer.
+           4. application pushes notification event, and consumer service sends SMS one by one or in controlled rate.
+           5. this is good for retry also if SMS provider is slow.
+
+           Code snippet:
+
+                              kafkaProducer.send(new ProducerRecord<>("notification-topic", "SAP1002", "send-location-update-sms"));
+
+        4. Scenario 4 - Photo submitted / blob uploaded event
+           1. in mobile flow dealer submits location details and photo upload also happens.
+           2. after upload, many extra works can come like image scan, metadata extract, audit log, status update.
+           3. instead of blocking mobile request, app can publish photo-uploaded event.
+           4. background consumer can do these heavy side works.
+           5. user gets faster response, system also becomes cleaner.
+
+           Code snippet:
+
+                              kafkaProducer.send(new ProducerRecord<>("dealer-photo-topic", "SAP1003", "photo-uploaded"));
+
+        5. Scenario 5 - Location update sync to other systems
+           1. if one dealer location changes, many downstream systems may need same update.
+           2. for example search cache, analytics DB, notification service, reporting service.
+           3. instead of calling every system directly, publish one location-updated event.
+           4. all interested consumers can read same event independently.
+           5. this is one strong reason why Kafka is used in real enterprise systems.
+
+           Code snippet:
+
+                              kafkaProducer.send(new ProducerRecord<>("dealer-location-topic", "SAP1004", "location-updated"));

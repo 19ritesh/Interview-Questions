@@ -1,0 +1,15 @@
+
+
+1. WHAT IS KAFKA ?
+___________________________________________
+
+        1. Kafka is distributed event streaming platform.
+        2. simple words, one service puts message in topic, another service reads it later.
+        3. it is very good when many events are coming continuously and we do not want everything in same request thread.
+        4. Kafka keeps data in topic-partitions, and consumers read by offset.
+        5. it is useful for async processing, decoupling, buffering, retry style flow, and real-time data pipelines.
+
+        Code snippet:
+
+                           ProducerRecord<String, String> record = new ProducerRecord<>("dealer-events", "D1001", "dealer-created");
+                           kafkaProducer.send(record);                         // producer puts one event in topic

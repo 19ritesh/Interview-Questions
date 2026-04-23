@@ -1,0 +1,15 @@
+
+
+Q1: What is CompletableFuture?
+
+        1. CompletableFuture is better version of Future in Java, and it is made for async programming.
+        2. one task can run in background thread, and result can come in this object after some time.
+        3. because of this, main thread not need stop and wait from start only.
+        4. after one result comes, next step can attach very easily, so flow looks connected.
+        5. one more useful thing is success also handle, error also handle in same flow without separate messy code.
+
+        6. Code snippet:
+
+                           CompletableFuture<String> cf = CompletableFuture.supplyAsync(() -> "dealer-data");
+                           String result = cf.join();
+                           System.out.println(result);
